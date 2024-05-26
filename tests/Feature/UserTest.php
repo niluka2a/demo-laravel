@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleEnum;
 use App\Models\Activity;
 use App\Models\Address;
 use App\Models\Course;
@@ -20,7 +21,7 @@ class UserTest extends TestCase {
      */
     public function testShowUserEndpoint(): void {
         $user = User::factory()->create([
-            'role_id' => 2,
+            'role_id' => RoleEnum::STUDENT->value,
             'address_id' => Address::inRandomOrder()->first()
         ]);
         $user->activities()->sync(Activity::inRandomOrder()->get()->slice(0, 3)->pluck('id')->toArray());
