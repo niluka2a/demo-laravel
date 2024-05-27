@@ -27,18 +27,35 @@ class UserTest extends TestCase {
         $user->activities()->sync(Activity::inRandomOrder()->get()->slice(0, 3)->pluck('id')->toArray());
         $user->courses()->sync(Course::inRandomOrder()->get()->slice(0, 1)->pluck('id')->toArray());
 
+        $user->refresh();
+
         $response = $this->actingAs($user, 'api')
             ->json('GET', '/api/users/' . $user->id, ['Accept' => 'application/json']);
 
         $response->assertStatus(200);
-        $response->assertJsonStructure([
+        $response->assertJson([
             'data' => [
-                'id',
-                'name',
-                'role',
-                'address',
-                'activities',
-                'courses',
+                'id' => $user->id,
+                'name' => $user->name,
+                'role' => $user->role->name,
+                'address' => [
+                    'id' => $user->address->id,
+                    'line_1' => $user->address->line_1,
+                    'line_2' => $user->address->line_2,
+                    'city' => $user->address->city,
+                    'zip_code' => $user->address->zip_code
+                ],
+                'activities' => [[
+                    'id' => $user->activities->first()->id,
+                    'name' => $user->activities->first()->name,
+                    'subject' => $user->activities->first()->subject->name,
+                    'score' => $user->activities->first()->score,
+                ]],
+                'courses' => [[
+                    'id' => $user->courses->first()->id,
+                    'name' => $user->courses->first()->name,
+                    'grade' => $user->courses->first()->grade->name,
+                ]],
             ]
         ]);
     }
